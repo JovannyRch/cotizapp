@@ -1,4 +1,5 @@
 import 'package:cotizapp/const/conts.dart';
+import 'package:cotizapp/screens/profile/edit_profile.dart';
 import 'package:cotizapp/widgets/custom_haeder.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -11,7 +12,7 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          _body(),
+          _body(context),
           CustomHeader(
             title: "Perfil",
             titleColor: Colors.white,
@@ -51,7 +52,7 @@ class ProfileScreen extends StatelessWidget {
     return container;
   }
 
-  Widget _body() {
+  Widget _body(BuildContext context) {
     return Column(
       children: [
         _header(),
@@ -74,7 +75,7 @@ class ProfileScreen extends StatelessWidget {
             ],
           ),
         ),
-        editButton(),
+        editButton(context),
         SizedBox(height: 20.0),
         _itemInfo("Nombre", "Nombre", Icons.person),
         _itemInfo("Correo", "jovannyrc@gmail.com", Icons.mail),
@@ -126,7 +127,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget editButton() {
+  Widget editButton(BuildContext context) {
     return Container(
       margin: EdgeInsets.only(top: 20.0),
       width: _size.width,
@@ -139,6 +140,12 @@ class ProfileScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(20.0),
           ),
           child: GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => EditProfile()),
+              );
+            },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
