@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "652749350278",
+    "firebase_url": "https://cotizapp-a8d04.firebaseio.com",
+    "project_id": "cotizapp-a8d04",
+    "storage_bucket": "cotizapp-a8d04.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:652749350278:android:44cba34f3d5a2ce9633807",
+        "android_client_info": {
+          "package_name": "com.iqneting.cotizapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "652749350278-680nmud03aiea4m7srgg0kfd3phrh143.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.iqneting.cotizapp",
+            "certificate_hash": "b354b41e4cd86e188b12391aa90904c80309ebbf"
+          }
+        },
+        {
+          "client_id": "652749350278-fdk5db41008cc5jl2uickvbf51f09m2b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDuFMEzm-McbYvS9qBQTzpJOPxNF1RId-k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "652749350278-fdk5db41008cc5jl2uickvbf51f09m2b.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

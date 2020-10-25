@@ -1,4 +1,4 @@
-package com.example.cotizapp
+package com.iqneting.cotizapp
 
 import io.flutter.embedding.android.FlutterActivity
 

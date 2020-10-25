@@ -1,0 +1,324 @@
+import 'package:cotizapp/const/conts.dart';
+import 'package:cotizapp/routes/routes.dart';
+import 'package:cotizapp/shared/user_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:cotizapp/components/blur_container.dart';
+
+class LoginScreen extends StatefulWidget {
+  String email;
+  String password;
+  LoginScreen({this.email = "", this.password = ""});
+
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  bool _isLoggedIn = false;
+  final _formKey = GlobalKey<FormState>();
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+  UserPreferences preferences = new UserPreferences();
+  bool isSubmitting = false;
+
+  @override
+  void initState() {
+    if (widget.email.isNotEmpty && widget.password.isNotEmpty) {
+      //Call login
+      doLogin();
+    }
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mq = MediaQuery.of(context);
+
+    final logo = Image.asset(
+      "assets/images/Logo.png",
+      height: mq.size.height / 3,
+    );
+
+    final emailField = TextFormField(
+        textAlign: TextAlign.center,
+        controller: _emailController,
+        keyboardType: TextInputType.emailAddress,
+        style: TextStyle(color: Colors.black),
+        cursorColor: Colors.black,
+        decoration: InputDecoration(
+            border: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.red),
+                borderRadius: BorderRadius.all(const Radius.circular(50.0))),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.all(const Radius.circular(50.0)),
+              borderSide: BorderSide(
+                color: kBaseColor,
+              ),
+            ),
+            hintText: "Ingrese su correo electrónico",
+            labelText: "Correo Electrónico",
+            hintStyle: TextStyle(color: kBaseColor)),
+        validator: (String value) {
+          if (value.isEmpty) {
+            return 'Ingrese su correo electrónico';
+          }
+
+          if (!RegExp(
+                  r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
+              .hasMatch(value)) {
+            return 'Ingrese un correo electrónico valido';
+          }
+
+          return null;
+        },
+        onSaved: (String value) {
+          _emailController.text = value;
+        });
+
+    final passwordField = Column(children: <Widget>[
+      TextFormField(
+          textAlign: TextAlign.center,
+          controller: _passwordController,
+          keyboardType: TextInputType.visiblePassword,
+          obscureText: true,
+          style: TextStyle(color: Colors.black),
+          cursorColor: Colors.black,
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.red),
+                borderRadius: BorderRadius.all(const Radius.circular(50.0))),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.all(const Radius.circular(50.0)),
+              borderSide: BorderSide(
+                color: kBaseColor,
+              ),
+            ),
+            hintText: "Ingrese su contraseña",
+            labelText: "Contraseña",
+            labelStyle: TextStyle(),
+            hintStyle: TextStyle(color: kBaseColor),
+          ),
+          validator: (String value) {
+            if (value.isEmpty) {
+              return 'Ingrese su contraseña';
+            }
+
+            return null;
+          },
+          onSaved: (String value) {
+            _passwordController.text = value;
+          })
+    ]);
+
+    final fields = Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        emailField,
+        Padding(padding: EdgeInsets.all(7.0)),
+        passwordField
+      ],
+    );
+
+    final loginButton = Column(children: [
+      Material(
+          borderRadius: BorderRadius.circular(15.0),
+          color: kBaseColor,
+          child: MaterialButton(
+            padding: EdgeInsets.fromLTRB(35.0, 10.0, 35.0, 10.0),
+            child: Text("Ingresar",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontSize: 20.0,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold)),
+            onPressed: handleLoginEmailPassword,
+          )),
+    ]);
+
+    final resetButton = MaterialButton(
+      child: Text(
+        "Olvide mi contraseña",
+        style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: kBaseColor,
+            decoration: TextDecoration.underline,
+            fontSize: 15.0),
+      ),
+      onPressed: () {
+        Navigator.of(context)
+            .pushNamedAndRemoveUntil('resetPassword', (route) => false);
+      },
+    );
+
+    final bottom = Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Padding(padding: EdgeInsets.all(15.0)),
+        loginButton,
+        Padding(padding: EdgeInsets.all(8.0)),
+        resetButton,
+        Padding(
+          padding: EdgeInsets.all(8.0),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              "¿Aun no tienes cuenta?",
+              style: Theme.of(context)
+                  .textTheme
+                  .subtitle1
+                  .copyWith(color: Colors.black),
+            ),
+          ],
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            MaterialButton(
+              onPressed: () {
+                Navigator.of(context)
+                    .pushNamedAndRemoveUntil(register, (route) => false);
+              },
+              child: Text(
+                "Registrarse",
+                style: Theme.of(context).textTheme.subtitle1.copyWith(
+                    color: kBaseColor, decoration: TextDecoration.underline),
+              ),
+            )
+          ],
+        ),
+      ],
+    );
+
+    return Scaffold(
+      body: BlurContainer(
+        isLoading: isSubmitting,
+        text: "Iniciando sesión",
+        children: [
+          Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 30.0),
+              child: Container(
+                height: mq.size.height,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    logo,
+                    fields,
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 30.0),
+                      child: bottom,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void doLogin() async {
+    UserCredential user = await signIn(widget.email, widget.password, context);
+    if (user != null) {
+      preferences.email = _emailController.text;
+      //Check user type
+      Navigator.of(context).popAndPushNamed('/');
+    }
+  }
+
+  void handleGoHome({UserCredential userCredential = null, User user = null}) {
+    setSubmitting(false);
+    if (user != null || userCredential != null) {
+      preferences.email = _emailController.text;
+      Navigator.of(context).popAndPushNamed('/');
+    }
+  }
+
+  void setSubmitting(bool val) {
+    setState(() {
+      isSubmitting = val;
+    });
+  }
+
+  void handleLoginEmailPassword() async {
+    setSubmitting(true);
+    if (!_formKey.currentState.validate()) {
+      setSubmitting(false);
+      return;
+    }
+    _formKey.currentState.save();
+
+    UserCredential user =
+        await signIn(_emailController.text, _passwordController.text, context);
+    if (user != null) {
+      handleGoHome(userCredential: user);
+    }
+  }
+
+  Future<UserCredential> signIn(
+      String email, String password, BuildContext context) async {
+    UserCredential result;
+    String errorMessage;
+
+    try {
+      result = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password)
+          .catchError((onError) {
+        print('ERRORRRRRRRR');
+        print(onError);
+        showAlert(context, 'Algo salio mal...', onError.toString());
+        return null;
+      });
+    } catch (error) {
+      errorMessage = error;
+      print(errorMessage);
+      return null;
+    }
+
+    if (errorMessage != null) {
+      return Future.error(errorMessage);
+    }
+
+    return result;
+  }
+
+  void showAlert(BuildContext context, String title, String error) {
+    var messageError;
+
+    switch (error) {
+      case '[firebase_auth/user-not-found] There is no user record corresponding to this identifier. The user may have been deleted.':
+        messageError =
+            'Su correo electrónico no esta vinculado a ninguna cuenta registrada.';
+        break;
+      default:
+        messageError = 'Verifique su correo y contraseña';
+    }
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.0)),
+            title: Text(title),
+            content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[Text(messageError)]),
+            actions: <Widget>[
+              FlatButton(
+                  onPressed: () => Navigator.of(context)
+                      .pushNamedAndRemoveUntil('login', (route) => false),
+                  child: Text('OK',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, color: kBaseColor)))
+            ],
+          );
+        });
+  }
+}
